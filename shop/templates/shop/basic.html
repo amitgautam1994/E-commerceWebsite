@@ -11,6 +11,18 @@
 
     <title>{% block title %} {% endblock %}</title>
     <style>
+        body,
+		html {
+			margin: 0;
+			padding: 0;
+
+			background: #FFE6F7 !important;
+		}
+        #hellotext{
+            color: aliceblue;
+            font-size: large;
+        }
+
         {% block css %} {% endblock %}
     </style>
 </head>
@@ -39,18 +51,18 @@
             <li class="nav-item">
                 <a class="nav-link" href="/shop/contact">Contact Us</a>
             </li>
-            <li class="nav-item">
-                <span style="color:grey;" class="nav-item mr-auto" id="hello-msg">Hello, {{ request.user }}</span>
-                <span style="color: grey;" class="nav-item mr-auto"><a href="{% url 'logout' %}">Logout</a> </span>
-            </li>
-
+        </ul>
+        <ul class="navbar-nav mr-left">
+            {% if user.is_authenticated %}
+            <li class="nav-link" id="hellotext">Hello, {{ request.user }} </li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}"><button class="btn btn-warning my-2 my-sm-0" type="submit">Logout</button></a></li>
+            {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><button class="btn btn-warning my-2 my-sm-0" type="submit">Login</button></a></li>
+            {% endif %}
         </ul>
 
 
-        <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
+
         <button type="button" class="btn btn-secondary mx-2" id="popcart" data-container="body" data-toggle="popover"
                 data-placement="bottom" data-html="true" data-content="Vivamus
 sagittis lacus vel augue laoreet rutrum faucibus.">

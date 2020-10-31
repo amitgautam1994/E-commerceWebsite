@@ -114,11 +114,20 @@ padding-right: 0;
         var popStr = "";
         popStr = popStr + "<h5> Cart for your items in my shopping cart </h5><div class='mx-2 my-2'>";
         var i = 1;
+        var nums = 0
+        var name1 = {}
         for (var item in cart) {
+            name1[document.getElementById('name' + item).innerHTML.slice(0, 19)] = cart[item]
+            nums +=1;
             popStr = popStr + "<b>" + i + "</b>. ";
             popStr = popStr + document.getElementById('name' + item).innerHTML.slice(0, 19) + "... Qty: " + cart[item] + '<br>';
             i = i + 1;
+            console.log("this is pop")
+            console.log(document.getElementById('name' + item).innerHTML.slice(0, 19))
+
         }
+        localStorage.setItem('name1', JSON.stringify(name1))
+        console.log(name1)
         popStr = popStr + "</div> <a href='/shop/checkout'><button class='btn btn-primary' id ='checkout'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()' id ='clearCart'>Clear Cart</button>     "
         console.log(popStr);
         document.getElementById('popcart').setAttribute('data-content', popStr);
