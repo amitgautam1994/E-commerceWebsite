@@ -1,11 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Product, Contact, Orders, OrderUpdate
 from math import ceil
 import json
+from django.contrib.auth import authenticate, login, logout
+
+from django.contrib import messages
+
+from django.contrib.auth.decorators import login_required
+
+from django.views.decorators.csrf import csrf_exempt
+
+from .forms import CreateUserForm
 
 # Create your views here.
 from django.http import HttpResponse
-
 
 def index(request):
     allProds = []
@@ -16,7 +24,7 @@ def index(request):
         n = len(prod)
         nSlides = n // 4 + ceil((n / 4) - (n // 4))
         allProds.append([prod, range(1, nSlides), nSlides])
-    params = {'allProds':allProds}
+    params = {'allProds': allProds}
     return render(request, 'shop/index.html', params)
 
 
@@ -25,7 +33,7 @@ def about(request):
 
 
 def contact(request):
-    if request.method=="POST":
+    if request.method == "POST":
         name = request.POST.get('name', '')
         email = request.POST.get('email', '')
         phone = request.POST.get('phone', '')
@@ -35,13 +43,14 @@ def contact(request):
     return render(request, 'shop/contact.html')
 
 
+login_required(login_url='login')
 def tracker(request):
-    if request.method=="POST":
+    if request.method == "POST":
         orderId = request.POST.get('orderId', '')
         email = request.POST.get('email', '')
         try:
             order = Orders.objects.filter(order_id=orderId, email=email)
-            if len(order)>0:
+            if len(order) > 0:
                 update = OrderUpdate.objects.filter(order_id=orderId)
                 updates = []
                 for item in update:
@@ -60,15 +69,16 @@ def search(request):
     return render(request, 'shop/search.html')
 
 
+login_required(login_url='login')
 def productView(request, myid):
-
     # Fetch the product using the id
     product = Product.objects.filter(id=myid)
-    return render(request, 'shop/prodView.html', {'product':product[0]})
+    return render(request, 'shop/prodView.html', {'product': product[0]})
 
 
+login_required(login_url='login')
 def checkout(request):
-    if request.method=="POST":
+    if request.method == "POST":
         items_json = request.POST.get('itemsJson', '')
         name = request.POST.get('name', '')
         email = request.POST.get('email', '')
@@ -84,5 +94,50 @@ def checkout(request):
         update.save()
         thank = True
         id = order.order_id
-        return render(request, 'shop/checkout.html', {'thank':thank, 'id': id})
+        return render(request, 'shop/checkout.html', {'thank': thank, 'id': id})
     return render(request, 'shop/checkout.html')
+
+
+@csrf_exempt
+def registerPage(request):
+    if request.user.is_authenticated:
+        return redirect('ShopHome')
+
+    else:
+        form = CreateUserForm()
+        if request.method == "POST":
+            form = CreateUserForm(request.POST)
+            if form.is_valid():
+                form.save()
+                user = form.cleaned_data.get('first_name') + ' ' + form.cleaned_data.get('last_name')
+                messages.success(request, "Account was created for " + user)
+                return redirect('login')
+
+        context = {'form': form}
+        return render(request, "shop/register.html", context)
+
+
+def loginPage(request):
+    # if request.user.is_authenticated:
+    #     return redirect('ShopHome')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('ShopHome')
+        else:
+            messages.info(request, 'Username OR password is incorrect')
+
+    context = {}
+    return render(request, 'shop/login.html', context)
+
+
+def logoutUser(request):
+    logout(request)
+    return redirect('login')
+

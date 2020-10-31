@@ -9,4 +9,7 @@ urlpatterns = [
     path("search/", views.search, name="Search"),
     path("products/<int:myid>", views.productView, name="ProductView"),
     path("checkout/", views.checkout, name="Checkout"),
+    path("register/", views.registerPage, name="register"),
+    path("login/", views.loginPage, name="login"),
+    path("logout/", views.logoutUser, name="logout"),
 ]
